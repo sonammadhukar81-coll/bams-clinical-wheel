@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BAMS Clinical Wheel</title>
+<style>
+:root{--bg:#f6f4ef;--card:#fff;--ink:#18201c;--muted:#68736d;--accent:#245b4a;--accent2:#d99b45;--line:#e5e2da;--danger:#a64b43}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header{padding:28px 18px 16px;max-width:1100px;margin:auto;display:flex;justify-content:space-between;align-items:center;gap:16px}
+.brand h1{margin:0;font-size:27px}.brand p{margin:5px 0 0;color:var(--muted)}
+.badge{background:#e6efe9;color:var(--accent);padding:8px 12px;border-radius:99px;font-weight:700;font-size:13px}
+main{max-width:1100px;margin:auto;padding:0 18px 40px}
+.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:0 7px 25px #1a251b0a}
+.wheelbox{min-height:620px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+canvas{width:min(430px,82vw);height:min(430px,82vw);max-width:430px;max-height:430px}
+.spin{margin-top:14px;border:0;background:var(--accent);color:#fff;font-size:18px;font-weight:800;padding:15px 30px;border-radius:14px;cursor:pointer;box-shadow:0 8px 18px #245b4a33}
+.spin:disabled{opacity:.55;cursor:wait}.pointer{font-size:30px;margin-bottom:-4px;z-index:2}
+.result{margin-top:16px;text-align:center}.result .eyebrow{text-transform:uppercase;letter-spacing:.12em;color:var(--muted);font-size:11px;font-weight:800}.result h2{margin:6px 0;font-size:27px}
+.controls{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}.filter{border:1px solid var(--line);background:#fff;border-radius:10px;padding:9px 11px;cursor:pointer}.filter.active{background:#e6efe9;border-color:#bdd5c9;color:var(--accent);font-weight:700}
+h3{margin:0 0 12px}.small{font-size:13px;color:var(--muted)}.session{display:grid;gap:11px}.step{border:1px solid var(--line);border-radius:15px;padding:13px}.step strong{display:block;margin-bottom:4px}
+.progress{height:10px;background:#ece9e2;border-radius:99px;overflow:hidden}.bar{height:100%;width:0;background:var(--accent);transition:.3s}
+.actions{display:flex;gap:9px;margin-top:13px}.btn{border:1px solid var(--line);background:#fff;padding:10px 13px;border-radius:10px;cursor:pointer;font-weight:700}.btn.primary{background:var(--accent);color:white;border-color:var(--accent)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:16px}.stat{background:#faf9f6;border-radius:13px;padding:12px}.stat b{font-size:22px;display:block}.stat span{font-size:12px;color:var(--muted)}
+.history{margin-top:18px}.historyrow{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}
+.notice{background:#fff7e9;border:1px solid #f0dfbd;padding:12px;border-radius:13px;font-size:13px;line-height:1.45}
+footer{max-width:1100px;margin:auto;padding:0 18px 30px;color:var(--muted);font-size:12px;text-align:center}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.wheelbox{min-height:540px}header{align-items:flex-start}.stats{grid-template-columns:repeat(3,1fr)}}
+</style>
+<link rel="manifest" href="manifest.webmanifest"><meta name="theme-color" content="#245b4a"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="BAMS Clinical Wheel">
+</head>
+<body>
+<header>
+ <div class="brand"><h1>🩺 BAMS Clinical Wheel</h1><p>Spin one topic. Learn it properly. Build clinical confidence.</p></div>
+ <div class="badge">2nd Year BAMS</div>
+</header>
+<main>
+<div class="grid">
+<section class="card wheelbox">
+ <div class="controls" id="filters"></div>
+ <div class="pointer">▼</div>
+ <canvas id="wheel" width="700" height="700"></canvas>
+ <button class="spin" id="spin">SPIN TODAY'S TOPIC</button>
+ <div class="result"><div class="eyebrow">Today's topic</div><h2 id="topic">Ready when you are</h2><div class="small" id="cat">Choose a category or use All Topics.</div></div>
+</section>
+
+<section>
+ <div class="card">
+  <h3>📚 Today's study plan</h3>
+  <div class="notice">The wheel chooses <b>what</b>. Your study session follows the same clinical structure every day, so you slowly learn how to think like a clinician.</div>
+  <div class="session" style="margin-top:13px">
+   <div class="step"><strong>1. Understand</strong><span class="small">What is it? Definition, causes, basic concept.</span></div>
+   <div class="step"><strong>2. History</strong><span class="small">What will you ask this patient?</span></div>
+   <div class="step"><strong>3. Examine</strong><span class="small">Vitals + general/systemic examination. Practice physically when possible.</span></div>
+   <div class="step"><strong>4. Interpret</strong><span class="small">What do the findings mean? What is normal vs abnormal?</span></div>
+   <div class="step"><strong>5. Investigate</strong><span class="small">Know the important investigations and why they are ordered.</span></div>
+   <div class="step"><strong>6. Manage</strong><span class="small">Basic modern approach + appropriate Ayurvedic correlation.</span></div>
+   <div class="step"><strong>7. Viva</strong><span class="small">Finish with rapid-fire questions and a mini case.</span></div>
+  </div>
+  <div class="actions">
+   <button class="btn primary" id="done">✓ Mark today's topic complete</button>
+   <button class="btn" id="reset">Reset progress</button>
+  </div>
+  <div class="stats">
+   <div class="stat"><b id="days">0</b><span>topics completed</span></div>
+   <div class="stat"><b id="streak">0</b><span>current streak</span></div>
+   <div class="stat"><b id="spins">0</b><span>total spins</span></div>
+  </div>
+ </div>
+ <div class="card history">
+  <h3>🗓️ Recent topics</h3><div id="history"><div class="small">No topics yet. Spin the wheel!</div></div>
+ </div>
+</section>
+</div>
+</main>
+<footer>Made for consistent clinical learning. This is a study planner, not a substitute for supervised clinical training.</footer>
+
+<script>
+const DATA = {"Clinical Skills": ["Blood Pressure Measurement", "Pulse Examination", "Respiratory Rate", "Temperature Measurement", "SpO₂ Measurement", "General Physical Examination", "Pallor Examination", "Icterus Examination", "Cyanosis Examination", "Clubbing Examination", "Lymph Node Examination", "Edema Examination", "Dehydration Assessment", "JVP Examination", "BMI & Nutritional Assessment", "Abdominal Examination", "Respiratory System Examination", "Cardiovascular Examination", "Neurological Examination", "Thyroid Examination", "History Taking", "Pain History", "Fever History", "Respiratory History", "GI History", "Urinary History", "Drug History", "Systemic Review", "Case Sheet Writing", "SOAP/Clinical Documentation"], "Medicine": ["Hypertension", "Diabetes Mellitus", "Anemia", "Fever Approach", "Asthma", "COPD", "Pneumonia", "Tuberculosis", "Heart Failure", "Ischemic Heart Disease", "Stroke", "Jaundice", "Hepatitis", "UTI", "Chronic Kidney Disease", "Hypothyroidism", "Hyperthyroidism", "Obesity", "GERD", "Peptic Ulcer Disease", "Diarrhea", "Constipation", "Vomiting", "Dengue", "Malaria", "Typhoid", "Rheumatoid Arthritis", "Osteoarthritis", "Gout", "Sepsis"], "Ayurveda Clinical": ["Jwara", "Prameha", "Pandu", "Kamala", "Shotha", "Kasa", "Shwasa", "Raktapitta", "Arsha", "Grahani", "Amlapitta", "Aamavata", "Sandhivata", "Vatarakta", "Pakshaghata", "Ekangavata", "Gridhrasi", "Shiroroga", "Mutrakrichra", "Ashmari", "Atisara", "Chhardi", "Hikka", "Karnaroga", "Netraroga", "Twak Vikara", "Rasayana", "Nidana Panchaka", "Rogi Pariksha", "Dashavidha Pariksha"], "Foundations": ["Dosha Assessment", "Prakriti", "Vikriti", "Agni Assessment", "Koshtha", "Bala Assessment", "Satmya", "Nadi Pariksha", "Mutra Pariksha", "Mala Pariksha", "Jihva Pariksha", "Shabda Pariksha", "Sparsha Pariksha", "Drik Pariksha", "Akriti Assessment", "Srotas Assessment", "Samprapti Ghataka", "Upashaya-Anupashaya", "Purvarupa vs Rupa", "Nidana Panchaka Revision"]};
+let category="All Topics", spinning=false, angle=0, current=null;
+const canvas=document.getElementById("wheel"), ctx=canvas.getContext("2d");
+const colors=["#d7e8df","#f5d7ad","#d8dff0","#f0c9c3","#d7e1b6","#ead9ef","#c9e2e8","#f1dfb9"];
+
+function topics(){return category==="All Topics"?Object.entries(DATA).flatMap(([c,arr])=>arr.map(x=>({x,c}))):DATA[category].map(x=>({x,c:category}));}
+function draw(){
+ const list=topics(), n=list.length, r=canvas.width/2, cx=r, cy=r;
+ ctx.clearRect(0,0,canvas.width,canvas.height);
+ ctx.save();ctx.translate(cx,cy);ctx.rotate(angle);
+ list.forEach((it,i)=>{
+  const a0=i*2*Math.PI/n, a1=(i+1)*2*Math.PI/n;
+  ctx.beginPath();ctx.moveTo(0,0);ctx.arc(0,0,r-8,a0,a1);ctx.closePath();
+  ctx.fillStyle=colors[i%colors.length];ctx.fill();ctx.strokeStyle="#ffffff";ctx.lineWidth=2;ctx.stroke();
+  if(n<=35){
+   ctx.save();ctx.rotate((a0+a1)/2);ctx.textAlign="right";ctx.fillStyle="#24302b";ctx.font="bold 13px system-ui";
+   let label=it.x.length>23?it.x.slice(0,22)+"…":it.x;ctx.fillText(label,r-25,5);ctx.restore();
+  }
+ });
+ ctx.restore();
+ ctx.beginPath();ctx.arc(cx,cy,54,0,2*Math.PI);ctx.fillStyle="#fff";ctx.fill();ctx.strokeStyle="#d8d4ca";ctx.stroke();
+ ctx.fillStyle="#245b4a";ctx.font="bold 17px system-ui";ctx.textAlign="center";ctx.fillText("BAMS",cx,cy+6);
+}
+function filters(){
+ const el=document.getElementById("filters"); el.innerHTML="";
+ ["All Topics",...Object.keys(DATA)].forEach(c=>{let b=document.createElement("button");b.className="filter "+(c===category?"active":"");b.textContent=c;b.onclick=()=>{category=c;filters();draw()};el.appendChild(b)});
+}
+function spin(){
+ if(spinning)return; const list=topics(); spinning=true;document.getElementById("spin").disabled=true;
+ const idx=Math.floor(Math.random()*list.length), n=list.length, slice=2*Math.PI/n;
+ // pointer is at top (-pi/2); arrange chosen slice center under pointer
+ const target=-Math.PI/2-(idx+.5)*slice;
+ const extra=(8+Math.floor(Math.random()*4))*2*Math.PI;
+ const start=angle, end=angle + extra + target-angle;
+ const t0=performance.now(), dur=3800;
+ function anim(t){
+  const p=Math.min(1,(t-t0)/dur), e=1-Math.pow(1-p,4); angle=start+(end-start)*e; draw();
+  if(p<1)requestAnimationFrame(anim); else{
+   angle=end%(2*Math.PI);current=list[idx]; spinning=false;document.getElementById("spin").disabled=false;
+   document.getElementById("topic").textContent=current.x;document.getElementById("cat").textContent=current.c;
+   saveSpin(current); renderStats();
+  }
+ }requestAnimationFrame(anim);
+}
+function getStore(){return JSON.parse(localStorage.getItem("bamsWheel")||'{"history":[],"completed":[],"spins":0}')};
+function setStore(s){localStorage.setItem("bamsWheel",JSON.stringify(s))}
+function saveSpin(it){let s=getStore();s.spins++;s.history.unshift({x:it.x,c:it.c,date:new Date().toLocaleDateString()});s.history=s.history.slice(0,10);setStore(s);renderStats()}
+function complete(){
+ if(!current){alert("Spin first — let the wheel choose today's topic.");return}
+ let s=getStore(), key=current.c+"|"+current.x, today=new Date().toDateString();
+ if(!s.completed.some(a=>a.key===key&&a.day===today)){s.completed.push({key,day:today,x:current.x});setStore(s);renderStats();alert("Completed! 🎉 Now come back tomorrow and spin again.");}
+ else alert("You've already marked this topic complete today.");
+}
+function renderStats(){
+ let s=getStore();document.getElementById("days").textContent=s.completed.length;document.getElementById("spins").textContent=s.spins;
+ let streak=0, d=new Date();let days=new Set(s.completed.map(x=>x.day));
+ while(days.has(d.toDateString())){streak++;d.setDate(d.getDate()-1)}document.getElementById("streak").textContent=streak;
+ let h=document.getElementById("history");h.innerHTML=s.history.length?s.history.map(a=>`<div class="historyrow"><span>${a.x}</span><span class="small">${a.c} · ${a.date}</span></div>`).join(""):'<div class="small">No topics yet. Spin the wheel!</div>';
+}
+document.getElementById("spin").onclick=spin;document.getElementById("done").onclick=complete;
+document.getElementById("reset").onclick=()=>{if(confirm("Reset all saved progress?")){localStorage.removeItem("bamsWheel");renderStats()}};
+filters();draw();renderStats();
+</script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
+}
+</script>
+</body></html>
